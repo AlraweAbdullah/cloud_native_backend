@@ -1,0 +1,3 @@
+node_modules
+src/domain/data-access/prisma/migrations
+start.sh

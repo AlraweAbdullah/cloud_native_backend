@@ -1,0 +1,22 @@
+version: '3'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432" # Map the PostgreSQL container's port 5432 to the host
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/mydb?schema=ecommerce" 
+    ports:
+      - "3000:3000" # Map your application's port to the host
+    depends_on:
+      - db # Ensure the 'app' service starts after 'db'
+
