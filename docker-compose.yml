@@ -11,7 +11,7 @@ services:
 
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/mydb?schema=ecommerce" 
@@ -20,3 +20,9 @@ services:
     depends_on:
       - db # Ensure the 'app' service starts after 'db'
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile 
+    ports:
+      - "8000:8000" 

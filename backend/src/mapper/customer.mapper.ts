@@ -1,20 +1,19 @@
-import { Customer } from "../domain/model/customer";
-import { CustomerPrisma, CountryPrisma } from "../util/db.server";
-import { mapToCountry } from "./country.mapper"
+import { Customer } from '../domain/model/customer';
+import { CustomerPrisma } from '../util/db.server';
+import { mapToProducts } from './product.mapper';
 
+const mapToCustomer = (customerPrisma: CustomerPrisma): Customer => {
+    return new Customer({
+        id: customerPrisma.id,
+        firstname: customerPrisma.firstname,
+        lastname: customerPrisma.lastname,
+        username: customerPrisma.username,
+        password: customerPrisma.password,
+        products: mapToProducts(customerPrisma.products),
+    });
+};
+const mapToCustomers = (customerDataArray: any[]): Customer[] => {
+    return customerDataArray.map((customerData) => mapToCustomer(customerData));
+};
 
-const mapToCustomer =({
-    id,
-    name,
-    lastname,
-    username, 
-    password,
-    country
-}: CustomerPrisma &  {country: CountryPrisma}):
-Customer => Customer.create(id,name, lastname, username, password, mapToCountry(country) )
-
-
-const mapToCustomers = (customerPrisma: CustomerPrisma[]): Customer[]  =>
-customerPrisma.map(mapToCustomer)
-
-export {mapToCustomer, mapToCustomers}
+export { mapToCustomer, mapToCustomers };

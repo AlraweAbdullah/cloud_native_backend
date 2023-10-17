@@ -1,24 +1,17 @@
-import { Product } from "../domain/model/product"
-import { ProductPrisma } from "../util/db.server"
-import { mapToCustomer } from "./customer.mapper"
+import { Product } from '../domain/model/product';
+import { ProductPrisma } from '../util/db.server';
 
-const mapToProduct =({
-   id,
-   name,
-   price,
-   stock,
-   description,
-   customer
-}: ProductPrisma):
-Product => Product.create(id, name,price, stock, description, mapToCustomer(customer))
- 
-    
+const mapToProduct = (productPrisma: ProductPrisma): Product => {
+    return new Product({
+        id: productPrisma.id,
+        name: productPrisma.name,
+        price: productPrisma.price,
+        description: productPrisma.description,
+    });
+};
 
-const mapToProducts = (productPrisma: ProductPrisma[]): Product[]  => {
-   return productPrisma.map(mapToProduct)
+const mapToProducts = (productPrismas: ProductPrisma[]): Product[] => {
+    return productPrismas.map(mapToProduct);
+};
 
-}
-
-export  {
-    mapToProduct, mapToProducts
-}
+export { mapToProduct, mapToProducts };

@@ -1,24 +1,18 @@
-import { PrismaClient , Prisma} from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client';
 
-const database = new PrismaClient()
-
+const database = new PrismaClient();
 
 type CustomerPrisma = Prisma.CustomerGetPayload<{
-    include:{country:true}
-}>
+    include: { products: true };
+}>;
 
-type ProductPrisma = Prisma.ProductGetPayload<{
-    include: {customer:{include:{country:true}}}
-}>
-
-type CountryPrisma = Prisma.CountryGetPayload<{
-
-}>
+type ProductPrisma = Prisma.ProductGetPayload<{}>;
 
 type TransactionPrisma = Prisma.TransactionGetPayload<{
-    include:{customer:{include:{country:true}}, product:{include:{customer:{include:{country:true}}}}}
-}>
+    include: {
+        customer: { include: { products: true } };
+        product: { include: { customer: true } };
+    };
+}>;
 
-
-
-export { database, CustomerPrisma, ProductPrisma, CountryPrisma,Prisma, TransactionPrisma}
+export { database, CustomerPrisma, ProductPrisma, Prisma, TransactionPrisma };

@@ -7,49 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Country {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique
-  customer Customer[]
-}
-
-// model Customer {
-//   id        Int     @id @default(autoincrement())
-//   name      String
-//   lastname  String
-//   username  String  @unique
-//   password  String
-//   books     Book[]
-//   country   Country @relation(fields: [countryId], references: [id])
-//   countryId Int
-// }
-
-// model Category {
-//   id   Int    @id @default(autoincrement())
-//   name String @unique
-//   book Book[]
-// }
-
-// model Book {
-//   id         Int        @id @default(autoincrement())
-//   pages      Int
-//   title      String
-//   customer   Customer   @relation(fields: [customerid], references: [id])
-//   customerid Int
-//   categories Category[]
-
-//   @@unique([title, customerid])
-// }
-
 model Customer {
   id          Int           @id @default(autoincrement())
-  name        String
+  firstname   String
   lastname    String
   username    String        @unique
   password    String
   products    Product[]
-  country     Country       @relation(fields: [countryId], references: [id])
-  countryId   Int
   Transaction Transaction[]
 }
 
@@ -57,15 +21,14 @@ model Product {
   id           Int           @id @default(autoincrement())
   name         String
   price        Int
-  stock        Int
   description  String
-  customer     Customer      @relation(fields: [customerid], references: [id])
-  customerid   Int
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   Int
   // Category    Category? @relation(fields: [categoryId], references: [id])
   // categoryId  Int?
   transactions Transaction[]
 
-  @@unique([name, customerid])
+  @@unique([name, customerId])
 }
 
 model Transaction {
