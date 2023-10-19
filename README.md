@@ -1,0 +1,5 @@
+.env file
+port = 3000
+JWT_SECRET = "WW91IHNwZW50IHRvIG11Y2ggdGltZSB0cnlpbmcgdG8gZGVjb2RlIHRoaXMgc3RyaW5nLg=="
+JWT_EXPIRES_HOURS = 8
+DATABASE = "ecommerce"
