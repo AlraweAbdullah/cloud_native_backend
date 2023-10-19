@@ -8,7 +8,7 @@ import type { TransactionInput } from '../types/types';
 
 const addtTransaction = async ({
     quantity,
-    customerId: customerId,
+    customerId,
     productId,
 }: TransactionInput): Promise<Transaction> => {
     await handleTransactionInput({ quantity, customerId, productId });
@@ -28,7 +28,7 @@ const handleTransactionInput = async ({ quantity, customerId, productId }) => {
         throw new Error("Buyer id can't be empty.");
     }
 
-    await customerService.getCustomerById({ id: customerId });
+    await customerService.getCustomerById(customerId);
     await productService.getProductById({ id: productId });
 };
 

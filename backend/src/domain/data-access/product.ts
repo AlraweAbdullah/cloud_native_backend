@@ -1,6 +1,7 @@
-import { mapToProduct, mapToProducts } from '../../mapper/product.mapper';
-import { database, Prisma } from '../../util/db.server';
+import { client } from '../../util/db.server';
 import { Product } from '../model/product';
+import { ObjectId } from 'mongodb';
+import { Customer } from '../model/customer';
 
 const addProduct = async ({
     name,
@@ -11,147 +12,92 @@ const addProduct = async ({
     name: string;
     price: number;
     description: string;
-    customerId: number;
+    customerId: string;
 }): Promise<Product> => {
     try {
-        const productPrisma = await database.product.create({
-            data: {
+        const productsCollection = client.db(process.env.DATABASE).collection('products');
+
+        // Check if the product name already exists for the customer
+        const existingProduct = await productsCollection.findOne({
+            name,
+            customerId,
+        });
+
+        if (existingProduct) {
+            throw new Error(`Seller already has a product with name ${name}.`);
+        }
+
+        // Create the product document
+        const product = {
+            name,
+            price,
+            description,
+            customerId,
+        };
+
+        // Insert the product into MongoDB
+        const result = await productsCollection.insertOne(product);
+        if (result) {
+            return new Product({
+                id: result.insertedId,
                 name,
                 price,
                 description,
-                customer: {
-                    connect: { id: customerId },
-                },
-            },
-            include: {
-                customer: { include: { products: true } },
-            },
-        });
-        return mapToProduct(productPrisma);
-    } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2002') {
-                throw new Error(`Seller has already a product with name {${name}}`);
-            }
+            });
+        } else {
+            throw new Error('Product insertion failed.');
         }
+    } catch (error) {
+        console.error('Error adding product:', error);
         throw new Error(error.message);
     }
 };
 
-const getProductById = async ({ id }: { id: number }): Promise<Product> => {
-    const product = await database.product.findUnique({
-        where: { id: id },
-        include: {
-            customer: { include: { products: true } },
-        },
-    });
-
-    if (!product) {
-        throw new Error(`Product with id {${id}} couldn't be found`);
-    }
-
-    return mapToProduct(product);
-};
-
-const getProductByName = async ({ name }: { name: string }): Promise<Product[] | Error> => {
-    const products = await database.product.findMany({
-        where: {
-            name: name,
-        },
-        include: {
-            customer: { include: { products: true } },
-        },
-    });
-
-    const mapper = mapToProducts(products);
-    if (mapper.length == 0) {
-        throw new Error(`Couldn't find name that contain {${name}}`);
-    } else {
-        return mapper;
-    }
-};
-
-const getAllProducts = async (): Promise<Product[]> => {
-    const products = await database.product.findMany({
-        include: {
-            customer: { include: { products: true } },
-        },
-    });
-    return mapToProducts(products);
-};
-
-const deleteProductById = async ({ id }: { id: number }): Promise<Product> => {
-    await getProductById({ id: id }); // Check if product exists by id
-    const deleteProduct = await database.product.delete({
-        where: {
-            id: id,
-        },
-        include: {
-            customer: { include: { products: true } },
-        },
-    });
-    return mapToProduct(deleteProduct);
-};
-
-const updateProduct = async ({
-    id,
-    name,
-    price,
-    description,
-    customerId,
-}: {
-    id: number;
-    name: string;
-    price: number;
-    description: string;
-    customerId: number;
-}): Promise<Product> => {
+const getProductById = async (id: string): Promise<Product> => {
     try {
-        const productPrisma = await database.product.update({
-            where: {
-                id: id,
-            },
-            data: {
-                name,
-                price,
-                description,
-            },
-            include: {
-                customer: { include: { products: true } },
-            },
-        });
-        return mapToProduct(productPrisma);
-    } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2002') {
-                throw new Error(`Seller has already a product with name {${name}}`);
-            }
+        const productsCollection = client.db(process.env.DATABASE).collection('products');
+        const product = await productsCollection.findOne({ _id: new ObjectId(id) });
+        if (product) {
+            return new Product({
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                description: product.description,
+            });
+        } else {
+            throw new Error(`Product with ID ${id} couldn't be found`);
         }
-        throw new Error(error.message);
+    } catch (error) {
+        throw new Error(`Error retrieving product: ${error.message}`);
     }
 };
-const getProductsOf = async (id: number, isMyProduct: boolean): Promise<Product[]> => {
-    const productsPrisma = await database.product.findMany({
-        where: isMyProduct ? { customerId: id } : { NOT: { customerId: id } },
-        include: {
-            customer: { include: { products: true } },
-        },
-    });
 
-    if (productsPrisma) {
-        const products = mapToProducts(productsPrisma);
-        return products;
-    } else {
-        return [];
+const getProductsOf = async (customerId: string, isMyProduct: boolean): Promise<Product[]> => {
+    try {
+        const productsCollection = client.db(process.env.DATABASE).collection('products');
+
+        const query = isMyProduct ? { customerId } : { customerId: { $ne: customerId } }; // $ne means not equal
+
+        const products = await productsCollection.find(query).toArray();
+
+        const mappedProducts = products.map(
+            (product) =>
+                new Product({
+                    id: product._id,
+                    name: product.name,
+                    price: product.price,
+                    description: product.description,
+                })
+        );
+
+        return mappedProducts;
+    } catch (error) {
+        throw new Error(`Error fetching products: ${error.message}`);
     }
 };
 
 export default {
     addProduct,
-    getAllProducts,
     getProductById,
-    deleteProductById,
-    getProductByName,
-    updateProduct,
     getProductsOf,
 };

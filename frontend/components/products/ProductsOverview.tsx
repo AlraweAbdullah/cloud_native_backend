@@ -8,7 +8,7 @@ type Props = {
 const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
     const [quantities, setQuantities] = useState<{ [productId: number]: number }>({});
 
-    const handleQuantityChange = (productId: number, quantity: number) => {
+    const handleQuantityChange = (productId: string, quantity: number) => {
         setQuantities((prevQuantities) => ({
             ...prevQuantities,
             [productId]: quantity,

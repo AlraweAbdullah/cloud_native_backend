@@ -14,7 +14,7 @@ const CustomerProducts: React.FC = () => {
 
     const [products, setProducts] = useState<Product[]>();
     const getCustomerProducts = async () => {
-        const customerId = Number(router.query.customerId);
+        const customerId = router.query.customerId as string;
 
         ProductService.getProductsOf(customerId, true)
             .then((res) => res.json())
@@ -36,7 +36,7 @@ const CustomerProducts: React.FC = () => {
         if (router.isReady) {
             if (!sessionCustomer) {
                 router.push('/');
-            } else if (Number(router.query.customerId) !== sessionCustomer.id) {
+            } else if (router.query.customerId !== sessionCustomer.id) {
                 router.push('/');
             } else {
                 getCustomerProducts();

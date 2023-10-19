@@ -9,7 +9,9 @@ import { productRouter } from './controller/product.routes';
 import { transactionRouter } from './controller/transaction.routes';
 
 import { expressjwt } from 'express-jwt';
+import { connectToMongoDB } from './util/db.server';
 
+connectToMongoDB();
 const app = express();
 dotenv.config();
 

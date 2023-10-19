@@ -1,17 +1,20 @@
 import { Product } from '../domain/model/product';
-import { ProductPrisma } from '../util/db.server';
+import { client } from '../util/db.server';
+import { ObjectId } from 'mongodb';
 
-const mapToProduct = (productPrisma: ProductPrisma): Product => {
+const mapToProduct = async (productId): Promise<Product> => {
+    const productsCollection = client.db(process.env.DATABASE).collection('products');
+
+    const productDB = await productsCollection.findOne({
+        _id: new ObjectId(productId),
+    });
+
     return new Product({
-        id: productPrisma.id,
-        name: productPrisma.name,
-        price: productPrisma.price,
-        description: productPrisma.description,
+        id: productId,
+        name: productDB.name,
+        price: productDB.price,
+        description: productDB.description,
     });
 };
 
-const mapToProducts = (productPrismas: ProductPrisma[]): Product[] => {
-    return productPrismas.map(mapToProduct);
-};
-
-export { mapToProduct, mapToProducts };
+export { mapToProduct };

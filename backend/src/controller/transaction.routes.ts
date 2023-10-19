@@ -85,7 +85,7 @@ transactionRouter.post('/', async (req: Request, res: Response) => {
  *         required: true
  *         description: The ID of the customer
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: Transaction overview for the customer
@@ -98,7 +98,7 @@ transactionRouter.post('/', async (req: Request, res: Response) => {
  */
 
 transactionRouter.get('/:customerId', async (req: Request, res: Response) => {
-    const customerId = parseInt(req.params.customerId, 10);
+    const customerId = req.params.customerId;
     try {
         const transactionOverview = await transactionServer.getTransactionsOverview({ customerId });
         res.status(200).json(transactionOverview);

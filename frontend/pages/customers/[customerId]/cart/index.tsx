@@ -51,7 +51,7 @@ const CustomerCart: React.FC = () => {
         if (router.isReady) {
             if (!sessionCustomer) {
                 router.push('/');
-            } else if (Number(router.query.customerId) !== sessionCustomer.id) {
+            } else if (router.query.customerId !== sessionCustomer.id) {
                 router.push('/');
             }
 

@@ -13,7 +13,7 @@ const CustomerSales: React.FC = () => {
     const [sales, setSales] = useState<Sale[]>();
 
     const getCustomerSales = async () => {
-        const customerId = Number(router.query.customerId);
+        const customerId = router.query.customerId as string;
 
         TransactionService.getSales(customerId)
             .then((res) => res.json())
@@ -35,7 +35,7 @@ const CustomerSales: React.FC = () => {
         if (router.isReady) {
             if (!sessionCustomer) {
                 router.push('/');
-            } else if (Number(router.query.customerId) !== sessionCustomer.id) {
+            } else if (router.query.customerId !== sessionCustomer.id) {
                 router.push('/');
             } else {
                 getCustomerSales();

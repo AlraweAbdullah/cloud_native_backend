@@ -6,7 +6,7 @@ import { Product } from '../../types';
 import { useRouter } from 'next/router';
 
 interface AddProductFormProps {
-    customerId: number;
+    customerId: string;
 }
 
 const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {

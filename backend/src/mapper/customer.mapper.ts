@@ -1,19 +1,22 @@
+import { ObjectId } from 'mongodb';
 import { Customer } from '../domain/model/customer';
-import { CustomerPrisma } from '../util/db.server';
-import { mapToProducts } from './product.mapper';
+import { client } from '../util/db.server';
 
-const mapToCustomer = (customerPrisma: CustomerPrisma): Customer => {
+const mapToCustomer = async (customerId): Promise<Customer> => {
+    const customersCollection = client.db(process.env.DATABASE).collection('customers');
+
+    const customerDB = await customersCollection.findOne({
+        _id: new ObjectId(customerId),
+    });
+
     return new Customer({
-        id: customerPrisma.id,
-        firstname: customerPrisma.firstname,
-        lastname: customerPrisma.lastname,
-        username: customerPrisma.username,
-        password: customerPrisma.password,
-        products: mapToProducts(customerPrisma.products),
+        id: customerId,
+        firstname: customerDB.firstname,
+        lastname: customerDB.lastname,
+        username: customerDB.username,
+        password: customerDB.password,
+        products: customerDB.product || [],
     });
 };
-const mapToCustomers = (customerDataArray: any[]): Customer[] => {
-    return customerDataArray.map((customerData) => mapToCustomer(customerData));
-};
 
-export { mapToCustomer, mapToCustomers };
+export { mapToCustomer };

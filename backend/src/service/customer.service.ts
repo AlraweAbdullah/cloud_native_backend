@@ -4,21 +4,17 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import customerDB from '../domain/data-access/customer.db';
 
-const jwtSecret = process.env.JWT_SECRET;
-
 const genrateJwtToken = (username: string): string => {
     const options = { expiresIn: `${process.env.JWT_EXPIRES_HOURS}h`, issuer: 'Ecommerce' };
     try {
-        return jwt.sign({ username }, jwtSecret, options);
+        return jwt.sign({ username }, process.env.JWT_SECRET, options);
     } catch (error) {
-        throw new Error('Error genrating JWT token');
+        throw new Error(error);
     }
 };
 
-const getAllCustomers = async (): Promise<Customer[]> => await customerDB.getAllCustomers();
-
-const getCustomerById = async ({ id }: { id: number }): Promise<Customer> =>
-    await customerDB.getCustomerById({ id: id });
+const getCustomerById = async (id: string): Promise<Customer> =>
+    await customerDB.getCustomerById(id);
 
 const createCustomer = async ({
     firstname,
@@ -26,7 +22,7 @@ const createCustomer = async ({
     password,
     username,
 }: CustomerInput): Promise<Customer> => {
-    const existingUser = await customerDB.getCustomerByUserName(username);
+    const existingUser = await customerDB.isAlradyCustomer(username);
     if (existingUser) {
         throw new Error('Customer already exists');
     }
@@ -58,7 +54,6 @@ const authenticate = async ({ username, password }: CustomerLoginInput): Promise
 const getCustomerByUserName = async (username: string) =>
     customerDB.getCustomerByUserName(username);
 export default {
-    getAllCustomers,
     getCustomerById,
     createCustomer,
     authenticate,

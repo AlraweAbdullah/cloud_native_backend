@@ -1,30 +1,31 @@
-version: '3'
+# Use root/example as user/password credentials
+version: '3.1'
+
 services:
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
+
+  mongo:
+    image: mongo
+    restart: always
     ports:
-      - "5432:5432"
-    restart: always 
-  app:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+      - 27017:27017
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/mydb?schema=ecommerce" 
-    ports:
-      - "3000:3000"
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
     depends_on:
-      - db
-    restart: always 
+      - mongo
+    restart: always
+    build: ./backend
+    ports:
+      - 3000:3000
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile 
+    build: ./frontend
     ports:
-      - "8000:8000"
-    restart: always 
+      - 8000:8000
+
+volumes:
+  mongodb_data:

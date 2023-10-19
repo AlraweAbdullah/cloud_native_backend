@@ -1,6 +1,6 @@
 import { Product } from '../types';
 
-const getProductsOf = async (customerId: number, isMyProduct: boolean) => {
+const getProductsOf = async (customerId: string, isMyProduct: boolean) => {
     return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${customerId}/${isMyProduct}`, {
         method: 'GET',
         headers: {

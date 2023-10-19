@@ -1,18 +1,16 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+const { MongoClient } = require('mongodb');
+const uri = 'mongodb://root:root@mongo:27017'; // Use the service name "mongo" here
+const client = new MongoClient(uri);
 
-const database = new PrismaClient();
+// Function to connect to the database
+const connectToMongoDB = async () => {
+    try {
+        // Connect to the MongoDB server
+        await client.connect();
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.error('Error connecting to MongoDB', error);
+    }
+};
 
-type CustomerPrisma = Prisma.CustomerGetPayload<{
-    include: { products: true };
-}>;
-
-type ProductPrisma = Prisma.ProductGetPayload<{}>;
-
-type TransactionPrisma = Prisma.TransactionGetPayload<{
-    include: {
-        customer: { include: { products: true } };
-        product: { include: { customer: true } };
-    };
-}>;
-
-export { database, CustomerPrisma, ProductPrisma, Prisma, TransactionPrisma };
+export { connectToMongoDB, client };

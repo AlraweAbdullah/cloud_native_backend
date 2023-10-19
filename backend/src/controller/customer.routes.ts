@@ -20,7 +20,7 @@
  *      CustomerInput:
  *        type: object
  *        properties:
- *          name:
+ *          firstname:
  *            type: string
  *            description: Customer name
  *          lastname:
@@ -67,8 +67,20 @@ const customerRouter = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Customer'
- *       404:
- *         description: Error
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 'error'
+ *               errorMessage: 'Please provide all fields'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 'error'
+ *               errorMessage: 'Internal server error'
  */
 
 customerRouter.post('/signup', async (req: Request, res: Response) => {
@@ -80,42 +92,15 @@ customerRouter.post('/signup', async (req: Request, res: Response) => {
             !customerInput.username ||
             !customerInput.password
         ) {
-            throw new Error('Please provide all fields');
+            res.status(400).json({ status: 'error', errorMessage: 'Please provide all fields' });
+        } else {
+            const customer = await customerService.createCustomer(customerInput);
+            res.status(200).json(customer);
         }
-        const customer = await customerService.createCustomer(customerInput);
-        res.status(200).json(customer);
     } catch (error) {
         res.status(500).json({ status: 'error', errorMessage: error.message });
     }
 });
-
-// /**
-// * @swagger
-// * /customers:
-// *   get:
-// *     security:
-// *       - bearerAuth: []
-// *     summary: Get list of customers.
-// *     responses:
-// *       200:
-// *         description: List of all customers
-// *         content:
-// *           application/json:
-// *             schema:
-// *               $ref: '#/components/schemas/Customer'
-// *       404:
-// *         description: Error
-// *
-// */
-// customerRouter.get("/", async (req: Request, res: Response) => {
-//     try {
-//         const customers = await customerService.getAllCustomers();
-
-//         res.status(200).json(customers)
-//     } catch (error) {
-//         res.status(500).json({ status: 'error', errorMessage: error.message })
-//     }
-// })
 
 /**
  * @swagger
@@ -149,72 +134,5 @@ customerRouter.post('/login', async (req: Request, res: Response) => {
         res.status(401).json({ status: 'Unauthorized', errorMessage: error.message });
     }
 });
-
-// /**
-//  * @swagger
-//  * /customers/{id}/products:
-//  *   get:
-//  *     summary: Retrieve products for a specific customer.
-//  *     description: Get the products data for a specific customer based on their customer ID.
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         schema:
-//  *           type: integer
-//  *         required: true
-//  *         description: The customer's unique identifier.
-//  *     responses:
-//  *       200:
-//  *         description: Products data for the customer.
-//  *       404:
-//  *         description: Error if the customer or products data is not found.
-//  */
-
-// customerRouter.get('/:id/products', async (req: Request, res: Response) => {
-//   try {
-//     const id: number = parseInt(req.params.id)
-//     // Use the customerService or your data source to fetch products data for the customer
-//     const products = await customerService.getCustomerProducts({id:id})
-
-//     // Return the products data as a JSON response
-//     res.status(200).json(products)
-//   } catch (error) {
-//     // Handle any errors and send an appropriate error response
-//     res.status(500).json({ status: 'error', errorMessage: error.message })
-//   }
-// })
-
-// /**
-// * @swagger
-// * /customers/{id}:
-// *   get:
-// *     security:
-// *       - bearerAuth: []
-// *     summary: Get an customer by id.
-// *     responses:
-// *       200:
-// *         description: Returns an customer, if not then an error is returned
-// *         content:
-// *           application/json:
-// *             schema:
-// *                $ref: '#/components/schemas/Customer'
-// *     parameters :
-// *        - name: id
-// *          in: path
-// *          description: id of the customer
-// *          required: true
-// *          type: integer
-// *          format: int64
-// *
-// */
-// customerRouter.get("/:id", async (req: Request, res: Response) => {
-//     try {
-//         const id: number = parseInt(req.params.id)
-//         const customer = await customerService.getCustomerById({ id: id });
-//         res.status(200).json(customer)
-//     } catch (error) {
-//         res.status(500).json({ status: 'error', errorMessage: error.message })
-//     }
-// })
 
 export { customerRouter };

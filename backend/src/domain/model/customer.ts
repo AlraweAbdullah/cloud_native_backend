@@ -1,7 +1,7 @@
 import { Product } from './product';
 
 export class Customer {
-    readonly id: number;
+    readonly id?: number;
     readonly firstname: string;
     readonly lastname: string;
     readonly username: string;
@@ -9,7 +9,7 @@ export class Customer {
     readonly products: Product[];
 
     constructor(customer: {
-        id: number;
+        id?: number;
         firstname: string;
         lastname: string;
         username: string;

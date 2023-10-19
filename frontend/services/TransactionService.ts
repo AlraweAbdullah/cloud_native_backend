@@ -1,4 +1,4 @@
-const addTransaction = async (quantity: number, customerId: number, productId: number) => {
+const addTransaction = async (quantity, customerId, productId) => {
     const data = {
         quantity,
         customerId,
@@ -15,7 +15,7 @@ const addTransaction = async (quantity: number, customerId: number, productId: n
     });
 };
 
-const getSales = async (customerId: number) => {
+const getSales = async (customerId: string) => {
     return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${customerId}`, {
         method: 'GET',
         headers: {

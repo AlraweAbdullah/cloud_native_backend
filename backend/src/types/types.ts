@@ -3,15 +3,15 @@ export type ProductInput = {
     name: string;
     price: number;
     description: string;
-    customerId: number;
+    customerId: string;
 };
 
 export type TransactionInput = {
     id: number;
     quantity: number;
     date: Date;
-    customerId: number;
-    productId: number;
+    customerId: string;
+    productId: string;
 };
 
 export type CustomerInput = {

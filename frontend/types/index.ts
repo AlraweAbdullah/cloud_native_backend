@@ -22,7 +22,7 @@ export interface StatusMessage {
 }
 
 export interface Customer {
-    id?: number;
+    id?: string;
     username: string;
     password: string;
     firstname?: string;
@@ -30,9 +30,9 @@ export interface Customer {
 }
 
 export interface Product {
-    id?: number;
+    id?: string;
     name: string;
     price: number;
     description: string;
-    customerId?: number;
+    customerId?: string;
 }

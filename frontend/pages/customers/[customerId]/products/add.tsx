@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 const AddProduct: React.FC = () => {
     const router = useRouter();
     const { customerId } = router.query;
-    const customerIdNumber = customerId ? parseInt(customerId as string, 10) : null;
+    const customerIdNumber = customerId as string;
 
     return (
         <>

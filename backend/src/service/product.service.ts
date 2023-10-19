@@ -1,4 +1,5 @@
 import { Product } from '../domain/model/product';
+
 import customerService from './customer.service';
 import productDB from '../domain/data-access/product';
 
@@ -11,36 +12,16 @@ const addProduct = async ({
     customerId,
 }: ProductInput): Promise<Product> => {
     await handleProductInput({ name, price, description, customerId });
+    //Check if customer exists
+    await customerService.getCustomerById(customerId);
     return await productDB.addProduct({ name, price, description, customerId: customerId });
 };
 
-const updateProduct = async ({
-    id,
-    name,
-    price,
-    description,
-    customerId,
-}: ProductInput): Promise<Product> => {
-    await handleProductInput({ name, price, description, customerId });
+const getProductById = async ({ id }: { id: string }): Promise<Product> =>
+    await productDB.getProductById(id);
 
-    // Check if product exists
-    await getProductById({ id });
-    return await productDB.updateProduct({ id, name, price, description, customerId: customerId });
-};
-
-const getProductById = async ({ id }: { id: number }): Promise<Product> =>
-    await productDB.getProductById({ id: id });
-
-const getAllProducts = async (): Promise<Product[]> => await productDB.getAllProducts();
-
-const getProductsOf = async (id: number, isMyProduct: boolean): Promise<Product[]> =>
+const getProductsOf = async (id: string, isMyProduct: boolean): Promise<Product[]> =>
     await productDB.getProductsOf(id, isMyProduct);
-
-const deleteProductById = async ({ id }: { id: number }) =>
-    await productDB.deleteProductById({ id: id });
-
-const getProductByName = async ({ name }: { name: string }): Promise<Product[] | Error> =>
-    await productDB.getProductByName({ name: name });
 
 const handleProductInput = async ({ name, price, description, customerId }) => {
     if (!name || name.trim() === '') {
@@ -59,15 +40,11 @@ const handleProductInput = async ({ name, price, description, customerId }) => {
         throw new Error("Customer id can't be empty.");
     }
     // check if customer exists
-    await customerService.getCustomerById({ id: customerId });
+    await customerService.getCustomerById(customerId);
 };
 
 export default {
     addProduct,
-    getAllProducts,
     getProductById,
-    deleteProductById,
-    getProductByName,
-    updateProduct,
     getProductsOf,
 };
