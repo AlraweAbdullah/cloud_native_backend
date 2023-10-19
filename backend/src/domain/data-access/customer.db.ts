@@ -15,7 +15,7 @@ const createCustomer = async ({
     password: string;
 }): Promise<Customer> => {
     try {
-        const customersCollection = client.db('test').collection('customers');
+        const customersCollection = client.db(process.env.DATABASE).collection('customers');
         const customer = {
             firstname,
             lastname,
@@ -77,7 +77,7 @@ const getCustomerByUserName = async (username: string): Promise<Customer> => {
 
 const isAlradyCustomer = async (username: string): Promise<Boolean> => {
     try {
-        const customersCollection = client.db('test').collection('customers');
+        const customersCollection = client.db(process.env.DATABASE).collection('customers');
         const customer = await customersCollection.findOne({ username: username });
 
         return customer ? true : false;
