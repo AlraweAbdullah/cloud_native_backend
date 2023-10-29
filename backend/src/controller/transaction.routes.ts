@@ -6,16 +6,17 @@
  *        type: object
  *        properties:
  *          id:
- *            type: number
- *            format: int64
+ *            type: string
+ *          buyerUsername:
+ *            type: string
+ *          productSerialNumber:
+ *             type: string
  *          quantity:
  *            type: number
  *            format: int64
  *            description: Transaction's quantity
- *          customer:
- *            $ref: '#/components/schemas/Customer'
- *          product:
- *            $ref: '#/components/schemas/Product'
+ *          sellerUsername:
+ *            type: string
  *
  *      TransactionInput:
  *        type: object
@@ -24,18 +25,16 @@
  *            type: number
  *            format: int64
  *            description: Transaction's quantity
- *          customerId:
- *            type: number
- *            format: int64
- *            description: Id of the customer we should already have abuyer id to link the transaction to it
- *          productId:
- *            type: number
- *            format: int64
- *            description: Id of the product we should already have a product id to link the transaction to it
+ *          buyerUsername:
+ *            type: string
+ *            description: username of the buyer we should already have abuyer id to link the transaction to it
+ *          productSerialNumber:
+ *            type: string
+ *            description: SerialNumber of the product we should already have a product  to link the transaction to it
  */
 import express, { Request, Response } from 'express';
 import transactionServer from '../service/transaction.service';
-import type { TransactionInput } from '../types/types';
+import type { TransactionDocument } from '../types/types';
 const transactionRouter = express.Router();
 
 /**
@@ -63,10 +62,10 @@ const transactionRouter = express.Router();
  */
 
 transactionRouter.post('/', async (req: Request, res: Response) => {
-    const newTransaction = <TransactionInput>req.body;
+    const newTransaction = <TransactionDocument>req.body;
     try {
-        const product = await transactionServer.addtTransaction(newTransaction);
-        res.status(200).json(product);
+        const transaction = await transactionServer.addtTransaction(newTransaction);
+        res.status(200).json(transaction);
     } catch (error) {
         res.status(500).json({ status: 'error', errorMessage: error.message });
     }
@@ -74,21 +73,21 @@ transactionRouter.post('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /transactions/{customerId}:
+ * /transactions/{sellerUsername}:
  *   get:
  *     security:
  *       - bearerAuth: []
  *     summary: Get transaction overview for a specific customer
  *     parameters:
  *       - in: path
- *         name: customerId
+ *         name: sellerUsername
  *         required: true
- *         description: The ID of the customer
+ *         description: The username of the seller
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Transaction overview for the customer
+ *         description: Transaction overview for the seller
  *         content:
  *           application/json:
  *             schema:
@@ -97,10 +96,10 @@ transactionRouter.post('/', async (req: Request, res: Response) => {
  *         description: Error
  */
 
-transactionRouter.get('/:customerId', async (req: Request, res: Response) => {
-    const customerId = req.params.customerId;
+transactionRouter.get('/:sellerUsername', async (req: Request, res: Response) => {
+    const sellerUsername = req.params.sellerUsername;
     try {
-        const transactionOverview = await transactionServer.getTransactionsOverview({ customerId });
+        const transactionOverview = await transactionServer.getTransactionsOverview(sellerUsername);
         res.status(200).json(transactionOverview);
     } catch (error) {
         res.status(500).json({ status: 'error', errorMessage: error.message });

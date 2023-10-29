@@ -3,48 +3,44 @@ import { Product } from '../domain/model/product';
 import customerService from './customer.service';
 import productDB from '../domain/data-access/product';
 
-import type { ProductInput } from '../types/types';
+import type { ProductDocument } from '../types/types';
 
-const addProduct = async ({
-    name,
-    price,
-    description,
-    customerId,
-}: ProductInput): Promise<Product> => {
-    await handleProductInput({ name, price, description, customerId });
+const addProduct = async (product: ProductDocument): Promise<Product> => {
+    await validateProduct(product);
     //Check if customer exists
-    await customerService.getCustomerById(customerId);
-    return await productDB.addProduct({ name, price, description, customerId: customerId });
+    await customerService.getCustomer(product.sellerUsername);
+    if (await productDB.productExists(product.serialNumber)) {
+        throw new Error(`Product with serial number ${product.serialNumber}  already exist`);
+    } else {
+        return await productDB.addProduct(product);
+    }
 };
 
-const getProductById = async ({ id }: { id: string }): Promise<Product> =>
-    await productDB.getProductById(id);
+const getProductsOf = async (customerUsername: string, isMyProduct: boolean): Promise<Product[]> =>
+    await productDB.getProductsOf(customerUsername, isMyProduct);
 
-const getProductsOf = async (id: string, isMyProduct: boolean): Promise<Product[]> =>
-    await productDB.getProductsOf(id, isMyProduct);
-
-const handleProductInput = async ({ name, price, description, customerId }) => {
-    if (!name || name.trim() === '') {
+const validateProduct = async (product: ProductDocument) => {
+    if (!product.name || product.name.trim() === '') {
         throw new Error("Name can't be empty.");
     }
 
-    if (!description || description.trim() === '') {
+    if (!product.description || product.description.trim() === '') {
         throw new Error("Description can't be empty.");
     }
 
-    if (!price || price <= 0) {
+    if (!product.price || product.price <= 0) {
         throw new Error('Price must be a positive number.');
     }
 
-    if (!customerId) {
-        throw new Error("Customer id can't be empty.");
+    if (!product.sellerUsername) {
+        throw new Error("Seller username can't be empty.");
     }
-    // check if customer exists
-    await customerService.getCustomerById(customerId);
 };
+
+const getProduct = async (serialNumber: string) => await productDB.getProduct(serialNumber);
 
 export default {
     addProduct,
-    getProductById,
     getProductsOf,
+    getProduct,
 };

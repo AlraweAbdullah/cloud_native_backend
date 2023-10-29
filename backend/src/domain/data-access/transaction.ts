@@ -1,50 +1,50 @@
 import { Transaction } from '../model/transaction';
-import { client } from '../../util/db.server';
-import { Customer } from '../model/customer';
+
+import { CosmosClient } from '@azure/cosmos';
+import { mapToTransaction } from '../../mapper/transaction.mapper';
 import { Product } from '../model/product';
-import { mapToCustomer } from '../../mapper/customer.mapper';
-import { mapToProduct } from '../../mapper/product.mapper';
+import { Customer } from '../model/customer';
+
+const cosmosEndpoint = process.env.COSMOS_ENDPOINT;
+const cosmosKey = process.env.COSMOS_KEY;
+const databaseName = process.env.COSMOS_DATABASE_NAME;
+
+const cosmosClient = new CosmosClient({
+    endpoint: cosmosEndpoint,
+    key: cosmosKey,
+});
+const container = cosmosClient.database(databaseName).container('Transactions');
 
 const addTransaction = async ({
-    customerId,
-    productId,
+    buyer,
+    product,
     quantity,
 }: {
-    customerId: string;
-    productId: string;
+    buyer: Customer;
+    product: Product;
     quantity: number;
 }): Promise<Transaction> => {
-    try {
-        const date = new Date();
-        const transactionsCollection = client.db(process.env.DATABASE).collection('transactions');
+    const currentDate = new Date();
+    const id = `${product.serialNumber}_${buyer.username}_${
+        product.sellerUsername
+    }_${currentDate.getTime()}`;
 
-        // Create the transaction document
-        const transaction = {
-            quantity,
-            date,
-            customerId,
-            productId,
-        };
+    const transaction = {
+        id: id,
+        buyerUsername: buyer.username,
+        productSerialNumber: product.serialNumber,
+        quantity: quantity,
+        date: currentDate,
+        sellerUsername: product.sellerUsername,
+        partition: id.substring(0, 3),
+    };
 
-        // Insert the transaction into MongoDB
-        const result = await transactionsCollection.insertOne(transaction);
+    const { resource } = await container.items.create(transaction);
 
-        if (result) {
-            const customer: Customer = await mapToCustomer(customerId);
-            const product: Product = await mapToProduct(productId);
-            return new Transaction({
-                id: result.insertedId, // Use the generated _id
-                customer,
-                product,
-                quantity,
-                date,
-            });
-        } else {
-            throw new Error('Transaction insertion failed.');
-        }
-    } catch (error) {
-        console.error('Error adding transaction:', error);
-        throw new Error(error.message);
+    if (resource) {
+        return mapToTransaction({ id, buyer, product, quantity, date: currentDate });
+    } else {
+        throw new Error('Transaction could not be added.');
     }
 };
 
@@ -80,53 +80,38 @@ const addTransaction = async ({
 //         throw new Error(`Error retrieving transactions: ${error.message}`);
 //     }
 // };
-const getTransactionsOverview = async (customerId: string): Promise<Transaction[]> => {
-    try {
-        const productsCollection = client.db(process.env.DATABASE).collection('products');
-        const transactionsCollection = client.db(process.env.DATABASE).collection('transactions');
+const getTransactionsOverview = async (sellerUsername: string): Promise<Transaction[]> => {
+    const querySpec = {
+        query: 'SELECT * FROM c WHERE c.sellerUsername = @sellerUsername',
+        parameters: [
+            {
+                name: '@sellerUsername',
+                value: sellerUsername,
+            },
+        ],
+    };
 
-        // Find all products associated with the customer
-        const products = await productsCollection.find({ customerId: customerId }).toArray();
+    const { resources } = await container.items.query(querySpec).fetchAll();
 
-        // Extract and convert the product IDs to strings
-        const productIds = products.map((product) => product._id.toString()); // Convert to string
-
-        // Find transactions related to these product IDs
-        const transactions = await transactionsCollection
-            .find({
-                productId: { $in: productIds },
-            })
-            .toArray();
-
-        const mappedTransactions = await Promise.all(
-            transactions.map(async (transaction) => {
-                // Find the associated product
-                const product = products.find((product) =>
-                    product._id.equals(transaction.productId)
-                );
-
-                if (product) {
-                    const mappedCustomer: Customer = await mapToCustomer(product.customerId);
-                    const mappedProduct: Product = await mapToProduct(product._id); // Map the product
-
-                    return new Transaction({
-                        id: transaction._id,
-                        customer: mappedCustomer,
-                        product: mappedProduct, // Include the mapped product
-                        quantity: transaction.quantity,
-                        date: transaction.date,
-                    });
-                } else {
-                    throw new Error(`Product not found for transaction ID: ${transaction._id}`);
-                }
-            })
-        );
-
-        return mappedTransactions;
-    } catch (error) {
-        throw new Error(`Error retrieving transactions: ${error.message}`);
-    }
+    return resources;
 };
+
+const getSalessOverview = async (buyerUsername: string): Promise<Transaction[]> => {
+    const querySpec = {
+        query: 'SELECT * FROM c WHERE c.buyerUsername = @buyerUsername',
+        parameters: [
+            {
+                name: '@buyerUsername',
+                value: buyerUsername,
+            },
+        ],
+    };
+
+    const { resources } = await container.items.query(querySpec).fetchAll();
+
+    return resources;
+};
+
 export default {
     addTransaction,
     getTransactionsOverview,

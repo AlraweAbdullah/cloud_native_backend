@@ -1,19 +1,12 @@
 import { Product } from '../domain/model/product';
-import { client } from '../util/db.server';
-import { ObjectId } from 'mongodb';
 
-const mapToProduct = async (productId): Promise<Product> => {
-    const productsCollection = client.db(process.env.DATABASE).collection('products');
-
-    const productDB = await productsCollection.findOne({
-        _id: new ObjectId(productId),
-    });
-
+const mapToProduct = (cosmosDBProduct): Product => {
     return new Product({
-        id: productId,
-        name: productDB.name,
-        price: productDB.price,
-        description: productDB.description,
+        serialNumber: cosmosDBProduct.id,
+        name: cosmosDBProduct.name,
+        price: cosmosDBProduct.price,
+        description: cosmosDBProduct.description,
+        sellerUsername: cosmosDBProduct.sellerUsername,
     });
 };
 

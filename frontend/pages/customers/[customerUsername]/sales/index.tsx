@@ -13,9 +13,9 @@ const CustomerSales: React.FC = () => {
     const [sales, setSales] = useState<Sale[]>();
 
     const getCustomerSales = async () => {
-        const customerId = router.query.customerId as string;
+        const customerUsername = router.query.customerUsername as string;
 
-        TransactionService.getSales(customerId)
+        TransactionService.getSales(customerUsername)
             .then((res) => res.json())
             .then((salesData) => {
                 if (salesData.status == 'error') {

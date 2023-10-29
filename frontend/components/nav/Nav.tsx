@@ -26,44 +26,46 @@ const Nav: React.FC = () => {
                     Home
                 </Link>
                 <Link
-                    href="/customers/[customerId]/products/add"
-                    as={`/customers/${user.id}/products/add`}
+                    href={`/customers/${user.username}/products/add`}
                     className={`link nav-link px-4 fs-5 ${
-                        router.pathname == '/customers/[customerId]/products/add' ? 'active' : ''
+                        router.pathname == '/customers/[customerUsername]/products/add'
+                            ? 'active'
+                            : ''
                     }`}
                 >
                     Add Product
                 </Link>
                 <Link
-                    href={`/customers/${user.id}/products`}
+                    href={`/customers/${user.username}/products`}
                     className={`link nav-link px-4 fs-5 ${
-                        router.pathname == '/customers/[customerId]/products' ? 'active' : ''
+                        router.pathname == '/customers/[customerUsername]/products' ? 'active' : ''
                     }`}
                 >
                     My Products
                 </Link>
                 <Link
-                    href="/customers/[customerId]/sales"
-                    as={`/customers/${user.id}/sales`}
+                    href={`/customers/${user.username}/sales`}
                     className={`link nav-link px-4 fs-5 ${
-                        router.pathname == '/customers/[customerId]/sales' ? 'active' : ''
+                        router.pathname == '/customers/[customerUsername]/sales' ? 'active' : ''
                     }`}
                 >
                     My Sales
                 </Link>
+
                 <Link
-                    href={`/products`}
+                    href={`/customers/${user.username}/marketplace`}
                     className={`link nav-link px-4 fs-5 ${
-                        router.pathname == '/products' ? 'active' : ''
+                        router.pathname == '/customers/[customerUsername]/marketplace'
+                            ? 'active'
+                            : ''
                     }`}
                 >
-                    Shop
+                    Marketplace
                 </Link>
                 <Link
-                    href="/customers/[customerId]/cart"
-                    as={`/customers/${user.id}/cart`}
+                    href={`/customers/${user.username}/cart`}
                     className={`link nav-link px-4 fs-5 ${
-                        router.pathname == '/customers/[customerId]/cart' ? 'active' : ''
+                        router.pathname == '/customers/[customerUsername]/cart' ? 'active' : ''
                     }`}
                 >
                     Cart

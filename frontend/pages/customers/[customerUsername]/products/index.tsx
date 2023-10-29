@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import Header from '../../../../components/Header';
 import Footer from '../../../../components/Footer';
 
-import ProductsOverview from '../../../../components/customers/ProductsOverview';
+import ProductsOverview from '../../../../components/customers/products/ProductsOverview';
 import ProductService from '../../../../services/ProductService';
 
 import { useEffect, useState } from 'react';
@@ -14,9 +14,9 @@ const CustomerProducts: React.FC = () => {
 
     const [products, setProducts] = useState<Product[]>();
     const getCustomerProducts = async () => {
-        const customerId = router.query.customerId as string;
+        const customerUsername = router.query.customerUsername as string;
 
-        ProductService.getProductsOf(customerId, true)
+        ProductService.getProductsOf(customerUsername, true)
             .then((res) => res.json())
             .then((products) => {
                 if (products.status == 'error') {
@@ -31,16 +31,15 @@ const CustomerProducts: React.FC = () => {
     };
 
     useEffect(() => {
-        const sessionCustomer = JSON.parse(sessionStorage.getItem('user'));
-
         if (router.isReady) {
+            const customerUsername = router.query.customerUsername as string;
+            const sessionCustomer = JSON.parse(sessionStorage.getItem('user'));
             if (!sessionCustomer) {
                 router.push('/');
-            } else if (router.query.customerId !== sessionCustomer.id) {
+            } else if (customerUsername !== sessionCustomer.username) {
                 router.push('/');
-            } else {
-                getCustomerProducts();
             }
+            getCustomerProducts();
         }
     }, [router.isReady]);
 

@@ -65,6 +65,7 @@ const LoginForm: React.FC<Props> = () => {
             sessionStorage.setItem('token', token);
             sessionStorage.setItem('user', userJSON);
             setTimeout(() => {
+                console.log(user);
                 router.push('/');
             }, 1000);
         } else if (response.status === 401) {

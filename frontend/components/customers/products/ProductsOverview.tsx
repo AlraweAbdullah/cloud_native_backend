@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product } from '../../types';
+import { Product } from '../../../types';
 
 type Props = {
     products: Array<Product>;
@@ -16,7 +16,7 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
             {products &&
                 products.map((product, index) => (
                     <div className="col-md-4 mb-4" key={index}>
-                        <div className="card" style={cardStyle}>
+                        <div className="card  market-card" style={cardStyle}>
                             <img
                                 src="https://loremflickr.com/320/240"
                                 className="card-img-top"
@@ -24,6 +24,7 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
                             />
                             <div className="card-body">
                                 <h5 className="card-title">{product.name}</h5>
+                                <p className="card-text">Serial: {product.serialNumber}</p>
                                 <p className="card-text">Price: ${product.price}</p>
                                 <p className="card-text">Description: {product.description}</p>
                             </div>

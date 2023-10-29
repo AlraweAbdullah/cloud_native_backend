@@ -1,39 +1,39 @@
 import { Transaction } from '../domain/model/transaction';
 import customerService from './customer.service';
-import productService from './product.service';
 
 import transactionDB from '../domain/data-access/transaction';
 
-import type { TransactionInput } from '../types/types';
+import type { TransactionDocument } from '../types/types';
+import productService from './product.service';
+import { Product } from '../domain/model/product';
+import { Customer } from '../domain/model/customer';
 
-const addtTransaction = async ({
-    quantity,
-    customerId,
-    productId,
-}: TransactionInput): Promise<Transaction> => {
-    await handleTransactionInput({ quantity, customerId, productId });
-    return await transactionDB.addTransaction({ customerId, productId, quantity });
+const addtTransaction = async (transaction: TransactionDocument): Promise<Transaction> => {
+    const product: Product = await productService.getProduct(transaction.productSerialNumber);
+    const buyer: Customer = await customerService.getCustomer(transaction.buyerUsername);
+    await handleTransaction(transaction);
+    return await transactionDB.addTransaction({
+        buyer: buyer,
+        product: product,
+        quantity: transaction.quantity,
+    });
 };
 
-const handleTransactionInput = async ({ quantity, customerId, productId }) => {
-    if (!quantity || quantity <= 0) {
+const handleTransaction = async (transaction: TransactionDocument) => {
+    if (!transaction.quantity || transaction.quantity <= 0) {
         throw new Error('Quantity must be a positive number.');
     }
 
-    if (!productId) {
-        throw new Error("Product id can't be empty.");
+    if (!transaction.productSerialNumber) {
+        throw new Error("Product serialNumber can't be empty.");
     }
 
-    if (!customerId) {
-        throw new Error("Buyer id can't be empty.");
-    }
-
-    await customerService.getCustomerById(customerId);
-    await productService.getProductById({ id: productId });
+    await customerService.getCustomer(transaction.buyerUsername);
 };
 
-const getTransactionsOverview = ({ customerId }): Promise<Transaction[]> =>
-    transactionDB.getTransactionsOverview(customerId);
+const getTransactionsOverview = (sellerUsername: string): Promise<Transaction[]> => {
+    return transactionDB.getTransactionsOverview(sellerUsername);
+};
 
 export default {
     addtTransaction,

@@ -1,19 +1,8 @@
-import exp from 'constants';
-
 export interface Sale {
     quantity: number;
-    product: Product;
+    productSerialNumber: string;
+    buyerUsername: string;
     date: Date;
-}
-
-export interface Author {
-    id?: number;
-    name: string;
-}
-
-export interface Category {
-    id: number;
-    name: string;
 }
 
 export interface StatusMessage {
@@ -30,9 +19,15 @@ export interface Customer {
 }
 
 export interface Product {
-    id?: string;
+    serialNumber: string;
     name: string;
     price: number;
     description: string;
-    customerId?: string;
+    sellerUsername?: string;
+}
+
+export interface Transaction {
+    quantity: number;
+    buyerUsername: string;
+    productSerialNumber: string;
 }

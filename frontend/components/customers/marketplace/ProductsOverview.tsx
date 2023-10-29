@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Product } from '../../types';
+import { Product } from '../../../types';
 
 type Props = {
     products: Array<Product>;
@@ -16,7 +16,7 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
     };
 
     const addToCart = (product: Product) => {
-        const quantity = quantities[product.id] || 1;
+        const quantity = quantities[product.serialNumber] || 1;
 
         // Create a copy of the current cart or initialize it as an empty array
         const cart: { product: Product; quantity: number }[] =
@@ -25,7 +25,7 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
         let exist = false;
 
         cart.forEach((element) => {
-            if (element.product.id === product.id) {
+            if (element.product.serialNumber === product.serialNumber) {
                 exist = true;
                 element.quantity += quantity;
             }
@@ -55,6 +55,7 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
                             />
                             <div className="card-body">
                                 <h5 className="card-title">{product.name}</h5>
+                                <p className="card-text">Serial: {product.serialNumber}</p>
                                 <p className="card-text">Price: ${product.price}</p>
                                 <p className="card-text">Description: {product.description}</p>
                                 <button
@@ -68,11 +69,11 @@ const ProductsOverview: React.FC<Props> = ({ products }: Props) => {
                                         type="number"
                                         onChange={(e) =>
                                             handleQuantityChange(
-                                                product.id,
+                                                product.serialNumber,
                                                 parseInt(e.target.value, 10)
                                             )
                                         }
-                                        value={quantities[product.id] || '1'}
+                                        value={quantities[product.serialNumber] || '1'}
                                         min={1}
                                     />
                                 </div>

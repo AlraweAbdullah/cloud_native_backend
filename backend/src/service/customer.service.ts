@@ -1,8 +1,8 @@
 import { Customer } from '../domain/model/customer';
-import { CustomerInput, CustomerLoginInput } from '../types/types';
+import { CustomerCredintials, CustomerDocument } from '../types/types';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import customerDB from '../domain/data-access/customer.db';
+import customerDB from '../domain/data-access/customer';
 
 const genrateJwtToken = (username: string): string => {
     const options = { expiresIn: `${process.env.JWT_EXPIRES_HOURS}h`, issuer: 'Ecommerce' };
@@ -13,34 +13,40 @@ const genrateJwtToken = (username: string): string => {
     }
 };
 
-const getCustomerById = async (id: string): Promise<Customer> =>
-    await customerDB.getCustomerById(id);
-
-const createCustomer = async ({
-    firstname,
-    lastname,
-    password,
-    username,
-}: CustomerInput): Promise<Customer> => {
-    const existingUser = await customerDB.isAlradyCustomer(username);
-    if (existingUser) {
-        throw new Error('Customer already exists');
+const createCustomer = async (customer: CustomerDocument): Promise<Customer> => {
+    if (await customerDB.customerExists(customer.username)) {
+        throw new Error(`Customer with username ${customer.username} already exists`);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    validateCustomer(customer);
 
-    return await customerDB.createCustomer({
-        firstname,
-        lastname,
-        username,
-        password: hashedPassword,
-    });
+    const hashedPassword = await bcrypt.hash(customer.password, 12);
+    customer.password = hashedPassword;
+    return await customerDB.createCustomer({ customer });
 };
 
-const authenticate = async ({ username, password }: CustomerLoginInput): Promise<string> => {
-    const customer = await getCustomerByUserName(username);
+const validateCustomer = (customer: CustomerDocument) => {
+    if (!customer.username || customer.username.length < 3) {
+        throw new Error('Username must be minimum 3 charachters.');
+    }
+
+    if (!customer.firstname || customer.firstname.length < 5) {
+        throw new Error('Firstname must be minimum 5 charachters.');
+    }
+
+    if (!customer.lastname || customer.lastname.length < 5) {
+        throw new Error('Lastname must be minimum 5 charachters.');
+    }
+
+    if (!customer.password || customer.password.length < 3) {
+        throw new Error('Password must be minimum 3 charachters.');
+    }
+};
+
+const authenticate = async ({ username, password }: CustomerCredintials): Promise<string> => {
+    const customer = await getCustomer(username);
     if (!customer) {
-        throw new Error("Customer couldn't be found");
+        throw new Error('Incorrect username');
     }
     const isValidPassword = await bcrypt.compare(password, customer.password);
 
@@ -51,11 +57,10 @@ const authenticate = async ({ username, password }: CustomerLoginInput): Promise
     return genrateJwtToken(username);
 };
 
-const getCustomerByUserName = async (username: string) =>
-    customerDB.getCustomerByUserName(username);
+const getCustomer = async (username: string) => customerDB.getCustomer(username);
+
 export default {
-    getCustomerById,
     createCustomer,
     authenticate,
-    getCustomerByUserName,
+    getCustomer,
 };

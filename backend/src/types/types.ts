@@ -1,34 +1,32 @@
-export type ProductInput = {
-    id: number;
+export interface ProductDocument {
+    serialNumber: string;
     name: string;
     price: number;
     description: string;
-    customerId: string;
-};
+    sellerUsername: string;
+}
 
-export type TransactionInput = {
-    id: number;
-    quantity: number;
-    date: Date;
-    customerId: string;
-    productId: string;
-};
-
-export type CustomerInput = {
-    id: number;
+export type CustomerDocument = {
+    username: string;
     firstname: string;
     lastname: string;
+    password: string;
+};
+
+export type CustomerCredintials = {
     username: string;
     password: string;
+};
+
+export type TransactionDocument = {
+    productSerialNumber: string;
+    quantity: number;
+    date?: Date;
+    buyerUsername: string;
 };
 
 export type CustomerLoginInput = {
     id: number;
     username: string;
     password: string;
-};
-
-export type CategoryInput = {
-    id: number;
-    name: string;
 };

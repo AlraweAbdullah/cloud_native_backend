@@ -7,7 +7,7 @@ const Login: React.FC = () => {
     return (
         <>
             <Head>
-                <title>Home</title>
+                <title>Log In</title>
             </Head>
 
             <Header></Header>

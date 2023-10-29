@@ -11,21 +11,19 @@ const SalesOverview: React.FC<Props> = ({ sales }: Props) => {
             <thead className="table-dark">
                 <tr>
                     <th className="text-white">Product</th>
-                    <th className="text-white">Amount</th>
+                    <th className="text-white">Quantity</th>
                     <th className="text-white">Date</th>
-                    <th className="text-white">Price</th>
-                    <th className="text-white">Total</th>
+                    <th className="text-white">Buyer</th>
                 </tr>
             </thead>
             <tbody>
                 {sales &&
                     sales.map((sale, index) => (
                         <tr key={index}>
-                            <td>{sale.product.name}</td>
+                            <td>{sale.productSerialNumber}</td>
                             <td>{sale.quantity}</td>
                             <td>{new Date(sale.date).toLocaleString()}</td>
-                            <td>${sale.product.price}</td>
-                            <td>${sale.product.price * sale.quantity}</td>
+                            <td>{sale.buyerUsername}</td>
                         </tr>
                     ))}
             </tbody>

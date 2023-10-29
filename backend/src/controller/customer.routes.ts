@@ -5,17 +5,18 @@
  *      Customer:
  *        type: object
  *        properties:
- *          id:
- *            type: number
- *            format: int64
- *          name:
+ *          firstname:
  *            type: string
- *            description: Customer name
- *          products:
- *            type: array
- *            description: List of all the products of the customer
- *            items:
- *               $ref: '#/components/schemas/Product'
+ *            description: Customer firstname
+ *          lastname:
+ *            type: string
+ *            description: Customer lastname
+ *          username:
+ *            type: string
+ *            description: Customer username(unique)
+ *          password:
+ *            type: string
+ *            description: Customer password
  *
  *      CustomerInput:
  *        type: object
@@ -46,7 +47,7 @@
 
 import express, { Request, Response } from 'express';
 import customerService from '../service/customer.service';
-import { CustomerInput, CustomerLoginInput } from '../types/types';
+import { CustomerCredintials, CustomerDocument } from '../types/types';
 const customerRouter = express.Router();
 
 /**
@@ -85,7 +86,7 @@ const customerRouter = express.Router();
 
 customerRouter.post('/signup', async (req: Request, res: Response) => {
     try {
-        const customerInput = <CustomerInput>req.body;
+        const customerInput = <CustomerDocument>req.body;
         if (
             !customerInput.firstname ||
             !customerInput.lastname ||
@@ -126,9 +127,9 @@ customerRouter.post('/signup', async (req: Request, res: Response) => {
 
 customerRouter.post('/login', async (req: Request, res: Response) => {
     try {
-        const customerLoginInput = <CustomerLoginInput>req.body;
+        const customerLoginInput = <CustomerCredintials>req.body;
         const token = await customerService.authenticate(customerLoginInput);
-        const user = await customerService.getCustomerByUserName(customerLoginInput.username);
+        const user = await customerService.getCustomer(customerLoginInput.username);
         res.status(200).json({ message: 'Authintication succesful', token, user });
     } catch (error) {
         res.status(401).json({ status: 'Unauthorized', errorMessage: error.message });

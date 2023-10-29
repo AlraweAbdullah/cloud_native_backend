@@ -1,103 +1,75 @@
-import { client } from '../../util/db.server';
+import { CosmosClient } from '@azure/cosmos';
 import { Product } from '../model/product';
-import { ObjectId } from 'mongodb';
-import { Customer } from '../model/customer';
+import { ProductDocument } from '../../types/types';
+import { mapToProduct } from '../../mapper/product.mapper';
 
-const addProduct = async ({
-    name,
-    price,
-    description,
-    customerId,
-}: {
-    name: string;
-    price: number;
-    description: string;
-    customerId: string;
-}): Promise<Product> => {
-    try {
-        const productsCollection = client.db(process.env.DATABASE).collection('products');
+const cosmosEndpoint = process.env.COSMOS_ENDPOINT;
+const cosmosKey = process.env.COSMOS_KEY;
+const databaseName = process.env.COSMOS_DATABASE_NAME;
 
-        // Check if the product name already exists for the customer
-        const existingProduct = await productsCollection.findOne({
-            name,
-            customerId,
-        });
+const cosmosClient = new CosmosClient({
+    endpoint: cosmosEndpoint,
+    key: cosmosKey,
+});
+const container = cosmosClient.database(databaseName).container('Products');
 
-        if (existingProduct) {
-            throw new Error(`Seller already has a product with name ${name}.`);
-        }
-
-        // Create the product document
-        const product = {
-            name,
-            price,
-            description,
-            customerId,
-        };
-
-        // Insert the product into MongoDB
-        const result = await productsCollection.insertOne(product);
-        if (result) {
-            return new Product({
-                id: result.insertedId,
-                name,
-                price,
-                description,
-            });
-        } else {
-            throw new Error('Product insertion failed.');
-        }
-    } catch (error) {
-        console.error('Error adding product:', error);
-        throw new Error(error.message);
+const addProduct = async (product: ProductDocument): Promise<Product> => {
+    const { resource } = await container.items.create({
+        id: product.serialNumber,
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        sellerUsername: product.sellerUsername,
+        partition: product.serialNumber.substring(0, 3),
+    });
+    if (resource) {
+        return mapToProduct(resource);
+    } else {
+        throw new Error('Product could not be added.');
     }
 };
 
-const getProductById = async (id: string): Promise<Product> => {
-    try {
-        const productsCollection = client.db(process.env.DATABASE).collection('products');
-        const product = await productsCollection.findOne({ _id: new ObjectId(id) });
-        if (product) {
-            return new Product({
-                id: product._id,
-                name: product.name,
-                price: product.price,
-                description: product.description,
-            });
-        } else {
-            throw new Error(`Product with ID ${id} couldn't be found`);
-        }
-    } catch (error) {
-        throw new Error(`Error retrieving product: ${error.message}`);
-    }
-};
+const getProductsOf = async (sellerUsername: string, isMyProduct: boolean): Promise<Product[]> => {
+    const querySpec = {
+        query: isMyProduct
+            ? 'SELECT * FROM c WHERE c.sellerUsername = @sellerUsername'
+            : 'SELECT * FROM c WHERE c.sellerUsername != @sellerUsername',
+        parameters: [
+            {
+                name: '@sellerUsername',
+                value: sellerUsername,
+            },
+        ],
+    };
 
-const getProductsOf = async (customerId: string, isMyProduct: boolean): Promise<Product[]> => {
-    try {
-        const productsCollection = client.db(process.env.DATABASE).collection('products');
+    const { resources } = await container.items.query(querySpec).fetchAll();
 
-        const query = isMyProduct ? { customerId } : { customerId: { $ne: customerId } }; // $ne means not equal
-
-        const products = await productsCollection.find(query).toArray();
-
-        const mappedProducts = products.map(
-            (product) =>
-                new Product({
-                    id: product._id,
-                    name: product.name,
-                    price: product.price,
-                    description: product.description,
-                })
-        );
-
+    if (resources.length > 0) {
+        // Use Promise.all to resolve all promises and get an array of Product objects
+        const mappedProducts = await Promise.all(resources.map((product) => mapToProduct(product)));
         return mappedProducts;
-    } catch (error) {
-        throw new Error(`Error fetching products: ${error.message}`);
+    } else {
+        throw new Error('Could not find products');
     }
+};
+
+const productExists = async (serialNumber: string): Promise<boolean> => {
+    const { resource } = await container.item(serialNumber, serialNumber.substring(0, 3)).read();
+    return !!resource;
+};
+
+const getProduct = async (serialNumber: string): Promise<Product> => {
+    const s = serialNumber.substring(0, 3);
+    const { resource } = await container.item(serialNumber, serialNumber.substring(0, 3)).read();
+    if (resource) {
+        return mapToProduct(resource);
+    }
+    throw new Error(`Product wuth serial number ${serialNumber} does not exist`);
 };
 
 export default {
     addProduct,
-    getProductById,
     getProductsOf,
+    productExists,
+    getProduct,
 };

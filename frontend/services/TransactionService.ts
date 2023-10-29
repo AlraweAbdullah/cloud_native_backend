@@ -1,12 +1,14 @@
-const addTransaction = async (quantity, customerId, productId) => {
-    const data = {
-        quantity,
-        customerId,
-        productId,
-    };
+import { Transaction } from '../types';
 
+const addTransaction = async (quantity, customerUsername, productSerialNumber) => {
+    const transaction: Transaction = {
+        quantity,
+        buyerUsername: customerUsername,
+        productSerialNumber,
+    };
+    console.log(transaction);
     return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions`, {
-        body: JSON.stringify(data),
+        body: JSON.stringify(transaction),
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

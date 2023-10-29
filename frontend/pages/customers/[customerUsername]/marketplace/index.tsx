@@ -1,18 +1,22 @@
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../../../components/Header';
+import Footer from '../../../../components/Footer';
 
-import ProductsOverview from '../../components/products/ProductsOverview';
-import ProductService from '../../services/ProductService';
+import ProductsOverview from '../../../../components/customers/marketplace/ProductsOverview';
+import ProductService from '../../../../services/ProductService';
 
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { Product } from '../../types';
+import { Product } from '../../../../types';
+import { useRouter } from 'next/router';
 
 const Sales: React.FC = () => {
     const [products, setProducts] = useState<Product[]>();
+    const router = useRouter();
 
-    const getCustomersProducts = async () => {
-        ProductService.getProductsOf(JSON.parse(sessionStorage.getItem('user')).id, false)
+    const customerUsername = router.query.customerUsername as string;
+
+    const getOtherProducts = async () => {
+        ProductService.getProductsOf(customerUsername, false)
             .then((res) => res.json())
             .then((products) => {
                 if (products.status == 'error') {
@@ -25,15 +29,25 @@ const Sales: React.FC = () => {
                 console.log(error);
             });
     };
-
     useEffect(() => {
-        getCustomersProducts();
-    }, []);
+        if (router.isReady) {
+            const sessionCustomer = JSON.parse(sessionStorage.getItem('user'));
+
+            const customerUsername = router.query.customerUsername as string;
+
+            if (!sessionCustomer) {
+                router.push('/');
+            } else if (customerUsername !== sessionCustomer.username) {
+                router.push('/');
+            }
+            getOtherProducts();
+        }
+    }, [router.isReady]);
 
     return (
         <>
             <Head>
-                <title>Products</title>
+                <title>Marketplace</title>
             </Head>
             <Header></Header>
 

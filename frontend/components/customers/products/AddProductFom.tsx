@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
-import ProductService from '../../services/ProductService';
-import StatusMessageParser from '../StatusMessageParser';
+import ProductService from '../../../services/ProductService';
+import StatusMessageParser from '../../StatusMessageParser';
 import { Button, Form } from 'react-bootstrap';
-import { Product } from '../../types';
+import { Product } from '../../../types';
 import { useRouter } from 'next/router';
 
-interface AddProductFormProps {
-    customerId: string;
+interface Props {
+    customerUsername: string;
 }
 
-const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
+const AddProductForm: React.FC<Props> = ({ customerUsername }) => {
     const [name, setName] = useState('');
+    const [serialNumber, setSerialNumber] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
 
     const [nameError, setNameError] = useState('');
     const [priceError, setPriceError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
+    const [serialNumberError, setSerialNumberError] = useState('');
 
     const [statusMessage, setStatusMessage] = useState(null);
     const router = useRouter();
@@ -26,6 +28,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
         setNameError('');
         setPriceError('');
         setDescriptionError('');
+        setSerialNumberError('');
 
         setStatusMessage(null);
 
@@ -43,6 +46,11 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
             isValid = false;
         }
 
+        if (!serialNumber || serialNumber.trim() === '') {
+            setSerialNumberError("Serial number can't be empty");
+            isValid = false;
+        }
+
         return isValid;
     };
 
@@ -56,7 +64,8 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
             name,
             price: parseInt(price),
             description: description.trim(),
-            customerId,
+            sellerUsername: customerUsername,
+            serialNumber,
         };
 
         const response = await ProductService.addProduct(product);
@@ -66,7 +75,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
                 type: 'success',
                 message: 'Product added successfully.',
             });
-            router.push(`/customers/${customerId}/products`);
+            router.push(`/customers/${customerUsername}/products`);
         } else {
             const data = await response.json();
             setStatusMessage({
@@ -83,6 +92,21 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
                 <StatusMessageParser statusMessage={statusMessage} />
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
+                        <Form.Label htmlFor="serialNumber">Product Name</Form.Label>
+                        <Form.Control
+                            id="serialNumber"
+                            type="text"
+                            value={serialNumber}
+                            onChange={(event) => {
+                                setSerialNumber(event.target.value);
+                            }}
+                        />
+
+                        <Form.Text className="text-muted">
+                            {nameError && <div className="text-danger">{serialNumberError}</div>}
+                        </Form.Text>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
                         <Form.Label htmlFor="name">Product Name</Form.Label>
                         <Form.Control
                             id="name"
@@ -92,6 +116,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ customerId }) => {
                                 setName(event.target.value);
                             }}
                         />
+
                         <Form.Text className="text-muted">
                             {nameError && <div className="text-danger">{nameError}</div>}
                         </Form.Text>

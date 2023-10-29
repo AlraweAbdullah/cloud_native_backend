@@ -6,8 +6,7 @@
  *        type: object
  *        properties:
  *          id:
- *            type: number
- *            format: int64
+ *            type: string
  *          name:
  *            type: string
  *            description: Product's name
@@ -18,16 +17,16 @@
  *          description:
  *            type: string
  *            description: Product's description
- *          customerId:
- *            type: number
- *            formar: int64
- *            description: Id of the customer we should already have a customer id to link the product to it
- *            items:
- *               $ref: '#/components/schemas/Customer'
- *
+ *          sellerUsername:
+ *            type: string
+ *            description: Username customer we should already have a customer to link the product to it
+
  *      ProductInput:
  *        type: object
  *        properties:
+ *          serialNumber:
+ *            type: string
+ *            description: Product's serialNumber
  *          name:
  *            type: string
  *            description: Product's name
@@ -38,17 +37,17 @@
  *          description:
  *            type: string
  *            description: Product's description
- *          customerId:
- *            type: number
- *            format: int64
- *            description: Id of the customer we should already have a customer id to link the product to it
+ *          sellerUsername:
+ *            type: string
+ *            description: Username of the customer we should already have a customer to link the product to it
+ * 
  *
  *
  *
  */
 import express, { Request, Response } from 'express';
 import productService from '../service/product.service';
-import type { ProductInput } from '../types/types';
+import type { ProductDocument } from '../types/types';
 const productRouter = express.Router();
 
 /**
@@ -76,7 +75,7 @@ const productRouter = express.Router();
  */
 
 productRouter.post('/', async (req: Request, res: Response) => {
-    const newProduct = <ProductInput>req.body;
+    const newProduct = <ProductDocument>req.body;
     try {
         const product = await productService.addProduct(newProduct);
         res.status(200).json(product);
@@ -87,13 +86,13 @@ productRouter.post('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /products/{id}/{isCustomerProducts}:
+ * /products/{sellerUsername}/{isCustomerProducts}:
  *   get:
  *     summary: Retrieve products based on customer and isCustomerProducts flag.
  *     description: Get products data based on the customer ID and isCustomerProducts flag.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: sellerUsername
  *         schema:
  *           type: string
  *         required: true
@@ -111,12 +110,15 @@ productRouter.post('/', async (req: Request, res: Response) => {
  *         description: Error if the customer or products data is not found.
  */
 
-productRouter.get('/:id/:isCustomerProducts', async (req: Request, res: Response) => {
+productRouter.get('/:sellerUsername/:isCustomerProducts', async (req: Request, res: Response) => {
     try {
-        const id: string = req.params.id;
+        const sellerUsername: string = req.params.sellerUsername;
         const isCustomerProducts: boolean = req.params.isCustomerProducts === 'true';
 
-        const customerProducts = await productService.getProductsOf(id, isCustomerProducts);
+        const customerProducts = await productService.getProductsOf(
+            sellerUsername,
+            isCustomerProducts
+        );
         res.status(200).json(customerProducts);
     } catch (error) {
         res.status(500).json({ status: 'error', errorMessage: error.message });

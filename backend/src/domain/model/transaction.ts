@@ -1,24 +1,24 @@
-import { Customer } from './customer';
-import { Product } from './product';
-
 export class Transaction {
     id: string;
-    customer: Customer;
-    product: Product;
+    buyerUsername: string;
+    productSerialNumber: string;
     quantity: number;
     date: Date;
+    sellerUsername: string;
 
     constructor(transaction: {
         id: string;
-        customer: Customer;
-        product: Product;
+        buyerUsername: string;
+        productSerialNumber: string;
         quantity: number;
         date: Date;
+        sellerUsername: string;
     }) {
         this.id = transaction.id;
-        this.customer = transaction.customer;
-        this.product = transaction.product;
+        this.buyerUsername = transaction.buyerUsername;
+        this.productSerialNumber = transaction.productSerialNumber;
         this.quantity = transaction.quantity;
         this.date = transaction.date;
+        this.sellerUsername = transaction.sellerUsername;
     }
 }

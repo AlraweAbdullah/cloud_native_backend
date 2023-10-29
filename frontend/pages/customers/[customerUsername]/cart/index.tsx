@@ -4,11 +4,12 @@ import Footer from '../../../../components/Footer';
 import TransactionService from '../../../../services/TransactionService';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { Customer, Product } from '../../../../types';
 
 const CustomerCart: React.FC = () => {
     const [isSessionStorageLoaded, setIsSessionStorageLoaded] = useState(false);
     const [cart, setCart] = useState([]);
-    const [customer, setCustomer] = useState(null);
+    const [customer, setCustomer] = useState<Customer>(null);
     const router = useRouter();
     const total = cart.reduce(
         (totalPrice, item) => totalPrice + item.product.price * item.quantity,
@@ -20,8 +21,8 @@ const CustomerCart: React.FC = () => {
             const requests = cart.map(async (element) => {
                 return TransactionService.addTransaction(
                     element.quantity,
-                    customer.id,
-                    element.product.id
+                    customer.username,
+                    element.product.serialNumber
                 );
             });
 
@@ -51,7 +52,7 @@ const CustomerCart: React.FC = () => {
         if (router.isReady) {
             if (!sessionCustomer) {
                 router.push('/');
-            } else if (router.query.customerId !== sessionCustomer.id) {
+            } else if (router.query.customerUsername !== sessionCustomer.username) {
                 router.push('/');
             }
 

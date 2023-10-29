@@ -67,7 +67,15 @@ button {
 /* ProductsOverview.css */
 .card {
   border: 2px solid gray !important;
+  min-height: 450px !important;
+  max-height: 450px !important;
 }
+
+.market-card{
+    min-height: 380px !important;
+    max-height: 380px !important;
+}
+
 
 .card-img-top {
   transform-origin: center;
@@ -97,3 +105,5 @@ button {
   transition: transform 0.3s;
   /* Add a smooth transition effect */
 }
+
+

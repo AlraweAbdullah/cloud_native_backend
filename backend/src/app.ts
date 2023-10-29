@@ -1,5 +1,9 @@
 import * as dotenv from 'dotenv';
 import express, { NextFunction } from 'express';
+
+const app = express();
+dotenv.config();
+
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
@@ -9,11 +13,6 @@ import { productRouter } from './controller/product.routes';
 import { transactionRouter } from './controller/transaction.routes';
 
 import { expressjwt } from 'express-jwt';
-import { connectToMongoDB } from './util/db.server';
-
-connectToMongoDB();
-const app = express();
-dotenv.config();
 
 const port = process.env.APP_PORT || 3000;
 
