@@ -1,0 +1,10 @@
+{
+  "serialNumber": "123",
+  "name": "product1",
+  "price": 200,
+  "description": "Product  with serial 123 and name product1 with price of 200 $",
+  "sellerUsername": "Admin"
+}
+
+authorization =
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFkbWluIiwiaWF0IjoxNjk5MDM3NDYxLCJleHAiOjE2OTkwNjYyNjEsImlzcyI6IkVjb21tZXJjZSJ9.7jRXmq_RHe936C7dlKk2tX1-l7B9iLFpCmxlBpT_owo
