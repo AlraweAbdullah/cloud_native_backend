@@ -59,11 +59,15 @@ export class ProductCache {
         await this.cacheClient.quit();
     }
 
-    async cacheProduct(productId: string, productDetails: string) {
-        await this.cacheClient.set(productId, productDetails, { EX: 600 }); // Adjust the expiration time as needed
+    async cacheProduct(username: string, productId: string, productDetails: string) {
+        // Include the username in the cache key
+        const cacheKey = `${username}_${productId}`;
+        await this.cacheClient.set(cacheKey, productDetails, { EX: 600 }); // Adjust the expiration time as needed
     }
 
-    async getCachedProduct(productId: string) {
-        return await this.cacheClient.get(productId);
+    async getCachedProduct(username: string, productId: string) {
+        // Include the username in the cache key
+        const cacheKey = `${username}_${productId}`;
+        return await this.cacheClient.get(cacheKey);
     }
 }

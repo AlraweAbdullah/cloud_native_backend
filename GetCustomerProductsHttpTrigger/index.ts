@@ -11,9 +11,14 @@ const httpTrigger: AzureFunction = async function (
   await authenticatedRouteWrapper(async () => {
     context.log("HTTP trigger function processed a request.");
 
+    const username: string = req.params.username;
     const mapping = context.bindingData.mapping;
+
+    // Include the username in the cache key
+    const cacheKey = `${username}_${mapping}`;
+
     const productCache = await ProductCache.getInstance();
-    const cachedProducts = await productCache.getCachedProduct(mapping);
+    const cachedProducts = await productCache.getCachedProduct(username, cacheKey);
 
     if (cachedProducts) {
       // Return cached products with a 200 OK status
@@ -25,14 +30,13 @@ const httpTrigger: AzureFunction = async function (
         }
       };
     } else {
-      const username: string = req.params.username;
       const products: Product[] = await ProductService.getProducts(
         username,
         true
       );
 
       // Cache products for future requests
-      await productCache.cacheProduct(mapping, JSON.stringify(products));
+      await productCache.cacheProduct(username, cacheKey, JSON.stringify(products));
 
       // Return fetched products with a 200 OK status
       context.res = {
