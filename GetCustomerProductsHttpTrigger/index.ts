@@ -18,17 +18,29 @@ const httpTrigger: AzureFunction = async function (
     const cacheKey = `${username}_${mapping}`;
 
     const productCache = await ProductCache.getInstance();
-    const cachedProducts = await productCache.getCachedProduct(username, cacheKey);
+    const productsString = await productCache.getCachedProduct(username, cacheKey);
 
-    if (cachedProducts) {
-      // Return cached products with a 200 OK status
-      context.res = {
-        status: 200,
-        body: { products: cachedProducts },
-        headers: {
-          "PRODUCTS-LOCATION": "cache"
-        }
-      };
+    if (productsString) {
+      try {
+        // Parse the string into a JavaScript object
+        const products: Product[] = JSON.parse(productsString);
+
+        // Return cached products with a 200 OK status
+        context.res = {
+          status: 200,
+          body: { products },
+          headers: {
+            "PRODUCTS-LOCATION": "cache"
+          }
+        };
+      } catch (error) {
+        // Handle JSON parsing error
+        context.log.error("Error parsing JSON from cache:", error);
+        context.res = {
+          status: 500,
+          body: { error: "Internal Server Error" },
+        };
+      }
     } else {
       const products: Product[] = await ProductService.getProducts(
         username,
