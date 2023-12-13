@@ -26,12 +26,12 @@ const httpTrigger: AzureFunction = async function (
         // Parse the string into a JavaScript object
         const sales: Transaction[] = JSON.parse(salesString);
 
-        // Return cached products with a 200 OK status
+        // Return cached sales with a 200 OK status
         context.res = {
           status: 200,
           body: { sales },
           headers: {
-            "PRODUCTS-LOCATION": "cache"
+            "SALES-LOCATION": "cache"
           }
         };
       } catch (error) {
@@ -46,14 +46,14 @@ const httpTrigger: AzureFunction = async function (
       const sales: Transaction[] =
         await TransactionsService.getSalesOverview(username);
 
-      // Cache products for future requests
+      // Cache saless for future requests
       await salesCache.cacheSales(username, cacheKey, JSON.stringify(sales));
-      // Return fetched products with a 200 OK status
+      // Return fetched sales with a 200 OK status
       context.res = {
         status: 200,
         body: { sales },
         headers: {
-          "PRODUCTS-LOCATION": "db"
+          "SALES-LOCATION": "db"
         }
       };
     }
