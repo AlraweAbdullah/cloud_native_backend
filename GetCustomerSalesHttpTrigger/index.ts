@@ -18,20 +18,20 @@ const httpTrigger: AzureFunction = async function (
     // Include the username in the cache key
     const cacheKey = `${username}_${mapping}`;
 
-    const salesCache = await SalesCache.getInstance();
-    const salesString = await salesCache.getCachedSales(username, cacheKey);
+    const transactionCache = await SalesCache.getInstance();
+    const transactionString = await transactionCache.getCachedSales(username, cacheKey);
 
-    if (salesString) {
+    if (transactionString) {
       try {
         // Parse the string into a JavaScript object
-        const sales: Transaction[] = JSON.parse(salesString);
+        const transactions: Transaction[] = JSON.parse(transactionString);
 
         // Return cached sales with a 200 OK status
         context.res = {
           status: 200,
-          body: { sales },
+          body: { transactions },
           headers: {
-            "SALES-LOCATION": "cache"
+            "TRANSACTIONS-LOCATION": "cache"
           }
         };
       } catch (error) {
@@ -43,23 +43,23 @@ const httpTrigger: AzureFunction = async function (
         };
       }
     } else {
-      const sales: Transaction[] =
+      const transactions: Transaction[] =
         await TransactionsService.getSalesOverview(username);
 
       // Cache saless for future requests
-      await salesCache.cacheSales(username, cacheKey, JSON.stringify(sales));
+      await transactionCache.cacheSales(username, cacheKey, JSON.stringify(transactions));
       // Return fetched sales with a 200 OK status
       context.res = {
         status: 200,
-        body: { sales },
+        body: { transactions },
         headers: {
-          "SALES-LOCATION": "db"
+          "TRANSACTIONS-LOCATION": "db"
         }
       };
     }
 
     // Close the connection to Redis
-    await salesCache.quit();
+    await transactionCache.quit();
 
   }, context);
 };
