@@ -44,7 +44,7 @@ const httpTrigger: AzureFunction = async function (
     } else {
       const products: Product[] = await ProductService.getProducts(
         username,
-        true
+        false
       );
 
       // Cache products for future requests
