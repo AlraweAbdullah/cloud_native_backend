@@ -24,7 +24,7 @@ export class ProductCache {
     private static async createClient() {
         const cacheHostName = process.env.REDIS_HOST_NAME;
         const cachePassword = process.env.REDIS_ACCESS_KEY;
-        const cachePort = process.env.REDIS_PORT || "6380";
+        const cachePort = process.env.REDIS_PORT;
 
         if (!cacheHostName) throw Error("REDIS_HOST_NAME is empty")
         if (!cachePassword) throw Error("REDIS_ACCESS_KEY is empty")
