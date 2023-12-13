@@ -2,7 +2,7 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { authenticatedRouteWrapper } from "../helpers/function-wrapper";
 import ProductService from "../service/product.service";
 import { Product } from "../domain/model/product";
-import { ProductCache } from "../domain/data-access/redis-product-cash";
+import { ProductCache } from "../domain/data-access/redis-product-cache";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
