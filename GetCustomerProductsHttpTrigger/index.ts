@@ -18,7 +18,7 @@ const httpTrigger: AzureFunction = async function (
     const cacheKey = `${username}_${mapping}`;
 
     const productCache = await ProductCache.getInstance();
-    const productsString = await productCache.getCachedProduct(username, cacheKey);
+    const productsString = await productCache.getCachedProduct(username, cacheKey, true);
 
     if (productsString) {
       try {
@@ -48,8 +48,7 @@ const httpTrigger: AzureFunction = async function (
       );
 
       // Cache products for future requests
-      await productCache.cacheProduct(username, cacheKey, JSON.stringify(products));
-
+      await productCache.cacheProduct(username, cacheKey, JSON.stringify(products), true);
       // Return fetched products with a 200 OK status
       context.res = {
         status: 200,

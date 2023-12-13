@@ -61,16 +61,17 @@ export class ProductCache {
     async quit() {
         await this.cacheClient.quit();
     }
-
-    async cacheProduct(username: string, productId: string, productDetails: string) {
-        // Include the username in the cache key
-        const cacheKey = `${username}_${productId}`;
-        await this.cacheClient.set(cacheKey, productDetails, { EX: 600 }); // Adjust the expiration time as needed
+    async cacheProduct(username: string, productId: string, productDetails: string, isCurrentUser: boolean) {
+        // Include the username and product ID in the cache key
+        const userType = isCurrentUser ? 'user' : 'other';
+        const cacheKey = `${userType}_${username}_${productId}`;
+        await this.cacheClient.set(cacheKey, productDetails, { EX: 10 }); // Adjust the expiration time as needed
     }
 
-    async getCachedProduct(username: string, productId: string): Promise<string | null> {
-        // Include the username in the cache key
-        const cacheKey = `${username}_${productId}`;
+    async getCachedProduct(username: string, productId: string, isCurrentUser: boolean): Promise<string | null> {
+        // Include the username and product ID in the cache key
+        const userType = isCurrentUser ? 'user' : 'other';
+        const cacheKey = `${userType}_${username}_${productId}`;
         return await this.cacheClient.get(cacheKey);
     }
 }
